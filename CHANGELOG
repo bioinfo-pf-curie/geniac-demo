@@ -1,14 +1,18 @@
+version-2.0.0
+02/10/2021
+
 NEW FEATURES
+  - update with geniac version-2.0.0
   - put source code in modules/fromSource, delete helloWorld.sh not needed anymore with new geniac version
 
 version-1.0.0
-31/05/2021
+05/31/2021
 
 NEW FEATURES
   - update with geniac version-1.0.0
 
 version-0.2.2
-21/05/2021
+05/21/2021
 
 BUG FIXES
   - In the dependencies section of the file trickSoftware.yml, pip has been added
@@ -17,7 +21,7 @@ NEW FEATURES
   - update with geniac version-0.2.3
 
 version-0.2.1
-20/05/2021
+05/20/2021
 
 NEW FEATURES
   - update with geniac version-0.2.2
@@ -26,7 +30,7 @@ BUG FIXES
   - params.geniac.containers.git must not be empty
 
 version-0.2.0
-19/05/2021
+05/19/2021
 
 NEW FEATURES
   - New default values for singularityRunOptions and dockerRunOptions
