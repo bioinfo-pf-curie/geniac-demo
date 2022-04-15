@@ -487,6 +487,82 @@ process multiqc {
   """
 }
 
+/***************************
+ * Example with R and renv *
+ ***************************/
+
+process renvGladInit {
+  label 'onlyLinux'
+  label 'minCpu'
+  label 'minMem'
+
+  output:
+  val(true) into renvGladInitDoneCh
+
+  script:
+    def renvName = 'renvGlad' // This is the only variable which needs to be modified
+    def renvBase = params.geniac.tools.get(renvName).get('base')
+    def renvLabel = params.geniac.tools.get(renvName).get('label')
+    def renvBioc = params.geniac.tools.get(renvName).get('bioc')
+    def renvLockfile = projectDir.toString() + '/recipes/dependencies/' + renvName + '/renv.lock'
+    println("renvLock: " + renvLockfile)
+    
+
+    // The code below is generic, normally, no modification is required
+    if (workflow.profile.contains('multiconda')) {
+        """
+        if conda env list | grep -wq ${renvLabel} || [ -d "${params.condaCacheDir}" -a -d "${renvLabel}" ] ; then
+            echo "prefix already exists, skipping environment creation"
+        else
+            CONDA_PKGS_DIRS=. conda env create --prefix ${renvLabel} --file ${renvBase}
+        fi
+  
+        set +u
+        conda_base=\$(dirname \$(which conda))
+        if [ -f \$conda_ conda/../../etc/profile.d/conda.sh ]; then
+          conda_script="\$conda_base/../../etc/profile.d/conda.sh"
+        else
+          conda_script="\$conda_base/../etc/profile.d/conda.sh"
+        fi
+  
+        echo \$conda_script
+        source \$conda_script
+        conda activate ${renvLabel}
+        set -u
+  
+        export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
+        export PKG_LIBS="-liconv"
+  
+        R -q -e "options(repos = \\"https://cloud.r-project.org\\") ; install.packages(\\"renv\\") ; options(renv.consent = TRUE, renv.config.install.staged=FALSE, renv.settings.use.cache=TRUE) ; install.packages(\\"BiocManager\\"); BiocManager::install(version=\\"${renvBioc}\\", ask=FALSE) ; renv::restore(lockfile = \\"${renvLockfile}\\")"
+        """
+    } else {
+        """
+        echo "profiles: ${workflow.profile} ; skip renv step"
+        """
+    }
+}
+
+renvGladInitDoneCh.set{ renvGladDoneCh}
+
+process glad {
+  label 'renvGlad'
+  label 'minCpu'
+  label 'minMem'
+  publishDir "${params.outDir}/GLAD", mode: 'copy'
+
+  input:
+  val(done) from renvGladDoneCh
+
+  output: 
+  file "BkpInfo.tsv"
+
+  script:
+  """
+  Rscript ${projectDir}/bin/apGlad.R
+  """
+}
+
+
 /****************
  * Sub-routines *
  ****************/
