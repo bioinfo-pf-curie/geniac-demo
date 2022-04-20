@@ -536,7 +536,28 @@ process renvGladInit {
         """
     } else if(workflow.profile.contains('conda')) {
 
+        renvEnv = "pipeline_env"
+        renvYml = "${projectDir}/environment.yml"
+
         """
+        if conda env list | grep -wq ${renvEnv} || [ -d "${params.condaCacheDir}" -a -d "${renvEnv}" ] ; then
+            echo "prefix already exists, skipping environment creation"
+        else
+            CONDA_PKGS_DIRS=. conda env create --prefix ${renvEnv} --file ${renvYml}
+        fi
+  
+        set +u
+        conda_base=\$(dirname \$(which conda))
+        if [ -f \$conda_ conda/../../etc/profile.d/conda.sh ]; then
+          conda_script="\$conda_base/../../etc/profile.d/conda.sh"
+        else
+          conda_script="\$conda_base/../etc/profile.d/conda.sh"
+        fi
+  
+        echo \$conda_script
+        source \$conda_script
+        conda activate ${renvEnv}
+        set -u
         export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
         export PKG_LIBS="-liconv"
   
