@@ -534,6 +534,14 @@ process renvGladInit {
   
         R -q -e "options(repos = \\"https://cloud.r-project.org\\") ; install.packages(\\"renv\\") ; options(renv.consent = TRUE, renv.config.install.staged=FALSE, renv.settings.use.cache=TRUE) ; install.packages(\\"BiocManager\\"); BiocManager::install(version=\\"${renvBioc}\\", ask=FALSE) ; renv::restore(lockfile = \\"${renvLockfile}\\")"
         """
+    } else if(workflow.profile.contains('conda')) {
+
+        """
+        export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
+        export PKG_LIBS="-liconv"
+  
+        R -q -e "options(repos = \\"https://cloud.r-project.org\\") ; install.packages(\\"renv\\") ; options(renv.consent = TRUE, renv.config.install.staged=FALSE, renv.settings.use.cache=TRUE) ; install.packages(\\"BiocManager\\"); BiocManager::install(version=\\"${renvBioc}\\", ask=FALSE) ; renv::restore(lockfile = \\"${renvLockfile}\\")"
+        """
     } else {
         """
         echo "profiles: ${workflow.profile} ; skip renv step"
