@@ -501,20 +501,19 @@ process renvGladInit {
 
   script:
     def renvName = 'renvGlad' // This is the only variable which needs to be modified
-    def renvBase = params.geniac.tools.get(renvName).get('base')
-    def renvLabel = params.geniac.tools.get(renvName).get('label')
+    def renvYml = params.geniac.tools.get(renvName).get('yml')
+    def renvEnv = params.geniac.tools.get(renvName).get('env')
     def renvBioc = params.geniac.tools.get(renvName).get('bioc')
     def renvLockfile = projectDir.toString() + '/recipes/dependencies/' + renvName + '/renv.lock'
-    println("renvLock: " + renvLockfile)
     
 
     // The code below is generic, normally, no modification is required
     if (workflow.profile.contains('multiconda')) {
         """
-        if conda env list | grep -wq ${renvLabel} || [ -d "${params.condaCacheDir}" -a -d "${renvLabel}" ] ; then
+        if conda env list | grep -wq ${renvEnv} || [ -d "${params.condaCacheDir}" -a -d "${renvEnv}" ] ; then
             echo "prefix already exists, skipping environment creation"
         else
-            CONDA_PKGS_DIRS=. conda env create --prefix ${renvLabel} --file ${renvBase}
+            CONDA_PKGS_DIRS=. conda env create --prefix ${renvEnv} --file ${renvYml}
         fi
   
         set +u
@@ -527,7 +526,7 @@ process renvGladInit {
   
         echo \$conda_script
         source \$conda_script
-        conda activate ${renvLabel}
+        conda activate ${renvEnv}
         set -u
   
         export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
