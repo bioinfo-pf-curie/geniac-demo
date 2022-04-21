@@ -508,7 +508,7 @@ process renvGladInit {
     
 
     // The code below is generic, normally, no modification is required
-    if (workflow.profile.contains('multiconda')) {
+    if (workflow.profile.contains('multiconda') || workflow.profile.contains('conda')) {
         """
         if conda env list | grep -wq ${renvEnv} || [ -d "${params.condaCacheDir}" -a -d "${renvEnv}" ] ; then
             echo "prefix already exists, skipping environment creation"
@@ -529,35 +529,6 @@ process renvGladInit {
         conda activate ${renvEnv}
         set -u
   
-        export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
-        export PKG_LIBS="-liconv"
-  
-        R -q -e "options(repos = \\"https://cloud.r-project.org\\") ; install.packages(\\"renv\\") ; options(renv.consent = TRUE, renv.config.install.staged=FALSE, renv.settings.use.cache=TRUE) ; install.packages(\\"BiocManager\\"); BiocManager::install(version=\\"${renvBioc}\\", ask=FALSE) ; renv::restore(lockfile = \\"${renvLockfile}\\")"
-        """
-    } else if(workflow.profile.contains('conda')) {
-
-        renvEnv = "pipeline_env"
-        renvYml = "${projectDir}/environment.yml"
-
-        """
-        if conda env list | grep -wq ${renvEnv} || [ -d "${params.condaCacheDir}" -a -d "${renvEnv}" ] ; then
-            echo "prefix already exists, skipping environment creation"
-        else
-            CONDA_PKGS_DIRS=. conda env create --prefix ${renvEnv} --file ${renvYml}
-        fi
-  
-        set +u
-        conda_base=\$(dirname \$(which conda))
-        if [ -f \$conda_ conda/../../etc/profile.d/conda.sh ]; then
-          conda_script="\$conda_base/../../etc/profile.d/conda.sh"
-        else
-          conda_script="\$conda_base/../etc/profile.d/conda.sh"
-        fi
-  
-        echo \$conda_script
-        source \$conda_script
-        conda activate ${renvEnv}
-        set -u
         export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
         export PKG_LIBS="-liconv"
   
