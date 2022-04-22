@@ -267,27 +267,27 @@ log.info "======================================================="
  * FastQC *
  **********/
 
-//process fastqc {
-//  label 'fastqc'
-//  label 'lowMem'
-//  label 'lowCpu'
-//
-//  tag "${prefix}"
-//  publishDir "${params.outDir}/fastqc", mode: 'copy'
-//
-//  input:
-//  set val(prefix), file(reads) from rawReadsFastqcCh
-//
-//  output:
-//  file "*_fastqc.{zip,html}" into fastqcResultsCh
-//  file "v_fastqc.txt" into fastqcVersionCh
-//
-//  script:
-//  """
-//  fastqc -q $reads
-//  fastqc --version > v_fastqc.txt
-//  """
-//}
+process fastqc {
+  label 'fastqc'
+  label 'lowMem'
+  label 'lowCpu'
+
+  tag "${prefix}"
+  publishDir "${params.outDir}/fastqc", mode: 'copy'
+
+  input:
+  set val(prefix), file(reads) from rawReadsFastqcCh
+
+  output:
+  file "*_fastqc.{zip,html}" into fastqcResultsCh
+  file "v_fastqc.txt" into fastqcVersionCh
+
+  script:
+  """
+  fastqc -q $reads
+  fastqc --version > v_fastqc.txt
+  """
+}
 
 /**********
  * alpine *
