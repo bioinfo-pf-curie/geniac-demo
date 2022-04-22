@@ -586,24 +586,26 @@ process checkDesign{
   """
 }
 
-//process outputDocumentation {
-//  label 'python'
-//  label 'minCpu'
-//  label 'minMem'
-//
-//  publishDir "${params.summaryDir}/", mode: 'copy'
-//
-//  input:
-//  file outputDocs from outputDocsCh
-//
-//  output:
-//  file "resultsDescription.html"
-//
-//  script:
-//  """
-//  markdown_to_html.py $outputDocs -o resultsDescription.html
-//  """
-//}
+process outputDocumentation {
+  label 'python'
+  label 'minCpu'
+  label 'minMem'
+
+  publishDir "${params.summaryDir}/", mode: 'copy'
+
+  input:
+  file outputDocs from outputDocsCh
+
+  output:
+  file "resultsDescription.html"
+
+  script:
+  """
+  which python > resultsDescription.html
+  conda env list >> resultsDescription.html
+  #markdown_to_html.py $outputDocs -o resultsDescription.html
+  """
+}
 
 workflow.onComplete {
 
