@@ -267,27 +267,27 @@ log.info "======================================================="
  * FastQC *
  **********/
 
-//process fastqc {
-//  label 'fastqc'
-//  label 'lowMem'
-//  label 'lowCpu'
-//
-//  tag "${prefix}"
-//  publishDir "${params.outDir}/fastqc", mode: 'copy'
-//
-//  input:
-//  set val(prefix), file(reads) from rawReadsFastqcCh
-//
-//  output:
-//  file "*_fastqc.{zip,html}" into fastqcResultsCh
-//  file "v_fastqc.txt" into fastqcVersionCh
-//
-//  script:
-//  """
-//  fastqc -q $reads
-//  fastqc --version > v_fastqc.txt
-//  """
-//}
+process fastqc {
+  label 'fastqc'
+  label 'lowMem'
+  label 'lowCpu'
+
+  tag "${prefix}"
+  publishDir "${params.outDir}/fastqc", mode: 'copy'
+
+  input:
+  set val(prefix), file(reads) from rawReadsFastqcCh
+
+  output:
+  file "*_fastqc.{zip,html}" into fastqcResultsCh
+  file "v_fastqc.txt" into fastqcVersionCh
+
+  script:
+  """
+  fastqc -q $reads
+  fastqc --version > v_fastqc.txt
+  """
+}
 
 /**********
  * alpine *
@@ -399,28 +399,28 @@ process trickySoftware {
  * Software versions *
  *********************/
 
-//process getSoftwareVersions{
-//  label 'python'
-//  label 'minCpu'
-//  label 'minMem'
-//  publishDir path: "${params.outDir}/softwareVersions", mode: "copy"
-//
-//  when:
-//  !params.skipSoftVersions
-//
-//  input:
-//  file 'v_fastqc.txt' from fastqcVersionCh.first().ifEmpty([])
-//
-//  output:
-//  file 'softwareVersions_mqc.yaml' into softwareVersionsYamlCh
-//
-//  script:
-//  """
-//  echo $workflow.manifest.version &> v_pipeline.txt
-//  echo $workflow.nextflow.version &> v_nextflow.txt
-//  scrape_software_versions.py &> softwareVersions_mqc.yaml
-//  """
-//}
+process getSoftwareVersions{
+  label 'python'
+  label 'minCpu'
+  label 'minMem'
+  publishDir path: "${params.outDir}/softwareVersions", mode: "copy"
+
+  when:
+  !params.skipSoftVersions
+
+  input:
+  file 'v_fastqc.txt' from fastqcVersionCh.first().ifEmpty([])
+
+  output:
+  file 'softwareVersions_mqc.yaml' into softwareVersionsYamlCh
+
+  script:
+  """
+  echo $workflow.manifest.version &> v_pipeline.txt
+  echo $workflow.nextflow.version &> v_nextflow.txt
+  scrape_software_versions.py &> softwareVersions_mqc.yaml
+  """
+}
 
 /********************
  * Workflow summary *
@@ -453,40 +453,40 @@ process workflowSummaryMqc {
  * MultiQC *
  ***********/
 
-//process multiqc {
-//  label 'multiqc'
-//  label 'minCpu'
-//  label 'minMem'
-//  publishDir "${params.outDir}/MultiQC", mode: 'copy'
-//
-//  when:
-//  !params.skipMultiQC
-//
-//  input:
-//  file splan from samplePlanCh.collect()
-//  file multiqcConfig from multiqcConfigCh
-//  file ('fastqc/*') from fastqcResultsCh.collect().ifEmpty([])
-//  file metadata from metadataCh.ifEmpty([])
-//  file ('softwareVersions/*') from softwareVersionsYamlCh.collect().ifEmpty([])
-//  file ('workflowSummary/*') from workflowSummaryYamlCh.collect()
-//
-//  output: 
-//  file splan
-//  file "*report.html" into multiqcReportCh
-//  file "*_data"
-//
-//  script:
-//  rtitle = customRunName ? "--title \"$customRunName\"" : ''
-//  rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
-//  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
-//  designOpts = params.design ? "-d ${params.design}" : ""
-//  modulesList = "-m custom_content -m fastqc"
-//  """
-//  apMqcHeader.py --splan ${splan} --name "${workflow.manifest.name}" --version "${workflow.manifest.version}" ${metadataOpts} > multiqc-config-header.yaml
-//  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
-//  """
-//}
-//
+process multiqc {
+  label 'multiqc'
+  label 'minCpu'
+  label 'minMem'
+  publishDir "${params.outDir}/MultiQC", mode: 'copy'
+
+  when:
+  !params.skipMultiQC
+
+  input:
+  file splan from samplePlanCh.collect()
+  file multiqcConfig from multiqcConfigCh
+  file ('fastqc/*') from fastqcResultsCh.collect().ifEmpty([])
+  file metadata from metadataCh.ifEmpty([])
+  file ('softwareVersions/*') from softwareVersionsYamlCh.collect().ifEmpty([])
+  file ('workflowSummary/*') from workflowSummaryYamlCh.collect()
+
+  output: 
+  file splan
+  file "*report.html" into multiqcReportCh
+  file "*_data"
+
+  script:
+  rtitle = customRunName ? "--title \"$customRunName\"" : ''
+  rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
+  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
+  designOpts = params.design ? "-d ${params.design}" : ""
+  modulesList = "-m custom_content -m fastqc"
+  """
+  apMqcHeader.py --splan ${splan} --name "${workflow.manifest.name}" --version "${workflow.manifest.version}" ${metadataOpts} > multiqc-config-header.yaml
+  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
+  """
+}
+
 /***************************
  * Example with R and renv *
  ***************************/
