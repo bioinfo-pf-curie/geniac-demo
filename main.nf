@@ -453,40 +453,40 @@ process workflowSummaryMqc {
  * MultiQC *
  ***********/
 
-process multiqc {
-  label 'multiqc'
-  label 'minCpu'
-  label 'minMem'
-  publishDir "${params.outDir}/MultiQC", mode: 'copy'
-
-  when:
-  !params.skipMultiQC
-
-  input:
-  file splan from samplePlanCh.collect()
-  file multiqcConfig from multiqcConfigCh
-  file ('fastqc/*') from fastqcResultsCh.collect().ifEmpty([])
-  file metadata from metadataCh.ifEmpty([])
-  file ('softwareVersions/*') from softwareVersionsYamlCh.collect().ifEmpty([])
-  file ('workflowSummary/*') from workflowSummaryYamlCh.collect()
-
-  output: 
-  file splan
-  file "*report.html" into multiqcReportCh
-  file "*_data"
-
-  script:
-  rtitle = customRunName ? "--title \"$customRunName\"" : ''
-  rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
-  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
-  designOpts = params.design ? "-d ${params.design}" : ""
-  modulesList = "-m custom_content -m fastqc"
-  """
-  apMqcHeader.py --splan ${splan} --name "${workflow.manifest.name}" --version "${workflow.manifest.version}" ${metadataOpts} > multiqc-config-header.yaml
-  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
-  """
-}
-
+//process multiqc {
+//  label 'multiqc'
+//  label 'minCpu'
+//  label 'minMem'
+//  publishDir "${params.outDir}/MultiQC", mode: 'copy'
+//
+//  when:
+//  !params.skipMultiQC
+//
+//  input:
+//  file splan from samplePlanCh.collect()
+//  file multiqcConfig from multiqcConfigCh
+//  file ('fastqc/*') from fastqcResultsCh.collect().ifEmpty([])
+//  file metadata from metadataCh.ifEmpty([])
+//  file ('softwareVersions/*') from softwareVersionsYamlCh.collect().ifEmpty([])
+//  file ('workflowSummary/*') from workflowSummaryYamlCh.collect()
+//
+//  output: 
+//  file splan
+//  file "*report.html" into multiqcReportCh
+//  file "*_data"
+//
+//  script:
+//  rtitle = customRunName ? "--title \"$customRunName\"" : ''
+//  rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
+//  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
+//  designOpts = params.design ? "-d ${params.design}" : ""
+//  modulesList = "-m custom_content -m fastqc"
+//  """
+//  apMqcHeader.py --splan ${splan} --name "${workflow.manifest.name}" --version "${workflow.manifest.version}" ${metadataOpts} > multiqc-config-header.yaml
+//  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
+//  """
+//}
+//
 /***************************
  * Example with R and renv *
  ***************************/
