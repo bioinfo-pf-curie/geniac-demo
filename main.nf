@@ -379,48 +379,48 @@ process fastqc {
 // * Some process with a software that has to be *
 // * installed with a custom conda yml file      *
 // ***********************************************/
-//
-//process trickySoftware {
-//  label 'trickySoftware'
-//  label 'minMem'
-//  label 'minCpu'
-//  publishDir "${params.outDir}/trickySoftware", mode: 'copy'
-//
-//  output:
-//  file "trickySoftwareResults.txt"
-//
-//  script:
-//  """
-//  python --version > trickySoftwareResults.txt 2>&1
-//  """
-//}
-//
-///*********************
-// * Software versions *
-// *********************/
-//
-//process getSoftwareVersions{
-//  label 'python'
-//  label 'minCpu'
-//  label 'minMem'
-//  publishDir path: "${params.outDir}/softwareVersions", mode: "copy"
-//
-//  when:
-//  !params.skipSoftVersions
-//
-//  input:
-//  file 'v_fastqc.txt' from fastqcVersionCh.first().ifEmpty([])
-//
-//  output:
-//  file 'softwareVersions_mqc.yaml' into softwareVersionsYamlCh
-//
-//  script:
-//  """
-//  echo $workflow.manifest.version &> v_pipeline.txt
-//  echo $workflow.nextflow.version &> v_nextflow.txt
-//  scrape_software_versions.py &> softwareVersions_mqc.yaml
-//  """
-//}
+
+process trickySoftware {
+  label 'trickySoftware'
+  label 'minMem'
+  label 'minCpu'
+  publishDir "${params.outDir}/trickySoftware", mode: 'copy'
+
+  output:
+  file "trickySoftwareResults.txt"
+
+  script:
+  """
+  python --version > trickySoftwareResults.txt 2>&1
+  """
+}
+
+/*********************
+ * Software versions *
+ *********************/
+
+process getSoftwareVersions{
+  label 'python'
+  label 'minCpu'
+  label 'minMem'
+  publishDir path: "${params.outDir}/softwareVersions", mode: "copy"
+
+  when:
+  !params.skipSoftVersions
+
+  input:
+  file 'v_fastqc.txt' from fastqcVersionCh.first().ifEmpty([])
+
+  output:
+  file 'softwareVersions_mqc.yaml' into softwareVersionsYamlCh
+
+  script:
+  """
+  echo $workflow.manifest.version &> v_pipeline.txt
+  echo $workflow.nextflow.version &> v_nextflow.txt
+  scrape_software_versions.py &> softwareVersions_mqc.yaml
+  """
+}
 
 /********************
  * Workflow summary *
