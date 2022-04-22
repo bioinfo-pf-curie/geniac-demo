@@ -279,7 +279,7 @@ process fastqc {
   set val(prefix), file(reads) from rawReadsFastqcCh
 
   output:
-  file "*_fastqc.{zip,html}" into fastqcResultsCh
+  //file "*_fastqc.{zip,html}" into fastqcResultsCh
   file "v_fastqc.txt" into fastqcVersionCh
 
   script:
