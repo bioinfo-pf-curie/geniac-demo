@@ -289,116 +289,116 @@ process fastqc {
   """
 }
 
-/**********
- * alpine *
- **********/
-// example with local variable
-
-oneToFiveCh = Channel.of(1..5)
-process alpine {
-  label 'alpine'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/alpine", mode: 'copy'
-
-  input:
-  val x from oneToFiveCh
-
-  output:
-  file "alpine_*"
-
-  script:
-  """
-  source ${projectDir}/env/alpine.env
-  echo "Hello from alpine: \$(date). This is very high here: \${PEAK_HEIGHT}!" > alpine_${x}.txt
-  """
-}
-
-/******************************
- * helloWord from source code *
- ******************************/
-
-process helloWorld {
-  label 'helloWorld'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/helloWorld", mode: 'copy'
-
-  output:
-  file "helloWorld.txt" into helloWorldOutputCh
-
-  script:
-  """
-  helloWorld > helloWorld.txt
-  """
-}
-
-/**************************************************
- * process with onlyLinux (standard unix command) *
- **************************************************/
-
-process standardUnixCommand {
-  label 'onlyLinux'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/standardUnixCommand", mode: 'copy'
-
-  input:
-  file hello from helloWorldOutputCh
-
-  output:
-  file "bonjourMonde.txt"
-
-  script:
-  """
-  sed -e 's/Hello World/Bonjour Monde/g' ${hello} > bonjourMonde.txt
-  """
-}
-
-/**************************************************************
- * process with onlylinux (invoke script from bin/ directory) *
- **************************************************************/
-
-process execBinScript {
-  label 'onlyLinux'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/execBinScript", mode: 'copy'
-
-  output:
-  file "execBinScriptResults_*"
-
-  script:
-  """
-  apMyscript.sh > execBinScriptResults_1.txt
-  someScript.sh > execBinScriptResults_2.txt
-  """
-}
-
-/***********************************************
- * Some process with a software that has to be *
- * installed with a custom conda yml file      *
- ***********************************************/
-
-process trickySoftware {
-  label 'trickySoftware'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/trickySoftware", mode: 'copy'
-
-  output:
-  file "trickySoftwareResults.txt"
-
-  script:
-  """
-  python --version > trickySoftwareResults.txt 2>&1
-  """
-}
-
-/*********************
- * Software versions *
- *********************/
-
+///**********
+// * alpine *
+// **********/
+//// example with local variable
+//
+//oneToFiveCh = Channel.of(1..5)
+//process alpine {
+//  label 'alpine'
+//  label 'minMem'
+//  label 'minCpu'
+//  publishDir "${params.outDir}/alpine", mode: 'copy'
+//
+//  input:
+//  val x from oneToFiveCh
+//
+//  output:
+//  file "alpine_*"
+//
+//  script:
+//  """
+//  source ${projectDir}/env/alpine.env
+//  echo "Hello from alpine: \$(date). This is very high here: \${PEAK_HEIGHT}!" > alpine_${x}.txt
+//  """
+//}
+//
+///******************************
+// * helloWord from source code *
+// ******************************/
+//
+//process helloWorld {
+//  label 'helloWorld'
+//  label 'minMem'
+//  label 'minCpu'
+//  publishDir "${params.outDir}/helloWorld", mode: 'copy'
+//
+//  output:
+//  file "helloWorld.txt" into helloWorldOutputCh
+//
+//  script:
+//  """
+//  helloWorld > helloWorld.txt
+//  """
+//}
+//
+///**************************************************
+// * process with onlyLinux (standard unix command) *
+// **************************************************/
+//
+//process standardUnixCommand {
+//  label 'onlyLinux'
+//  label 'minMem'
+//  label 'minCpu'
+//  publishDir "${params.outDir}/standardUnixCommand", mode: 'copy'
+//
+//  input:
+//  file hello from helloWorldOutputCh
+//
+//  output:
+//  file "bonjourMonde.txt"
+//
+//  script:
+//  """
+//  sed -e 's/Hello World/Bonjour Monde/g' ${hello} > bonjourMonde.txt
+//  """
+//}
+//
+///**************************************************************
+// * process with onlylinux (invoke script from bin/ directory) *
+// **************************************************************/
+//
+//process execBinScript {
+//  label 'onlyLinux'
+//  label 'minMem'
+//  label 'minCpu'
+//  publishDir "${params.outDir}/execBinScript", mode: 'copy'
+//
+//  output:
+//  file "execBinScriptResults_*"
+//
+//  script:
+//  """
+//  apMyscript.sh > execBinScriptResults_1.txt
+//  someScript.sh > execBinScriptResults_2.txt
+//  """
+//}
+//
+///***********************************************
+// * Some process with a software that has to be *
+// * installed with a custom conda yml file      *
+// ***********************************************/
+//
+//process trickySoftware {
+//  label 'trickySoftware'
+//  label 'minMem'
+//  label 'minCpu'
+//  publishDir "${params.outDir}/trickySoftware", mode: 'copy'
+//
+//  output:
+//  file "trickySoftwareResults.txt"
+//
+//  script:
+//  """
+//  python --version > trickySoftwareResults.txt 2>&1
+//  """
+//}
+//
+///*********************
+// * Software versions *
+// *********************/
+//
 //process getSoftwareVersions{
 //  label 'python'
 //  label 'minCpu'
@@ -566,46 +566,46 @@ process workflowSummaryMqc {
  * Sub-routines *
  ****************/
 
-process checkDesign{
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-  publishDir "${params.summaryDir}/", mode: 'copy'
-
-  when:
-  params.design
-
-  input:
-  file design from designCheckCh
-  file samplePlan from samplePlanCheckCh
-
-  script:
-  optSE = params.singleEnd ? "--singleEnd" : ""
-  """
-  apCheckDesign.py -d $design -s $samplePlan ${optSE}
-  """
-}
-
-process outputDocumentation {
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-
-  publishDir "${params.summaryDir}/", mode: 'copy'
-
-  input:
-  file outputDocs from outputDocsCh
-
-  output:
-  file "resultsDescription.html"
-
-  script:
-  """
-  which python > resultsDescription.html
-  conda env list >> resultsDescription.html
-  #markdown_to_html.py $outputDocs -o resultsDescription.html
-  """
-}
+//process checkDesign{
+//  label 'python'
+//  label 'minCpu'
+//  label 'minMem'
+//  publishDir "${params.summaryDir}/", mode: 'copy'
+//
+//  when:
+//  params.design
+//
+//  input:
+//  file design from designCheckCh
+//  file samplePlan from samplePlanCheckCh
+//
+//  script:
+//  optSE = params.singleEnd ? "--singleEnd" : ""
+//  """
+//  apCheckDesign.py -d $design -s $samplePlan ${optSE}
+//  """
+//}
+//
+//process outputDocumentation {
+//  label 'python'
+//  label 'minCpu'
+//  label 'minMem'
+//
+//  publishDir "${params.summaryDir}/", mode: 'copy'
+//
+//  input:
+//  file outputDocs from outputDocsCh
+//
+//  output:
+//  file "resultsDescription.html"
+//
+//  script:
+//  """
+//  which python > resultsDescription.html
+//  conda env list >> resultsDescription.html
+//  #markdown_to_html.py $outputDocs -o resultsDescription.html
+//  """
+//}
 
 workflow.onComplete {
 
