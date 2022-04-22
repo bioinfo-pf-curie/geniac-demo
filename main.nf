@@ -267,27 +267,27 @@ log.info "======================================================="
  * FastQC *
  **********/
 
-process fastqc {
-  label 'fastqc'
-  label 'lowMem'
-  label 'lowCpu'
-
-  tag "${prefix}"
-  publishDir "${params.outDir}/fastqc", mode: 'copy'
-
-  input:
-  set val(prefix), file(reads) from rawReadsFastqcCh
-
-  output:
-  file "*_fastqc.{zip,html}" into fastqcResultsCh
-  file "v_fastqc.txt" into fastqcVersionCh
-
-  script:
-  """
-  fastqc -q $reads
-  fastqc --version > v_fastqc.txt
-  """
-}
+//process fastqc {
+//  label 'fastqc'
+//  label 'lowMem'
+//  label 'lowCpu'
+//
+//  tag "${prefix}"
+//  publishDir "${params.outDir}/fastqc", mode: 'copy'
+//
+//  input:
+//  set val(prefix), file(reads) from rawReadsFastqcCh
+//
+//  output:
+//  file "*_fastqc.{zip,html}" into fastqcResultsCh
+//  file "v_fastqc.txt" into fastqcVersionCh
+//
+//  script:
+//  """
+//  fastqc -q $reads
+//  fastqc --version > v_fastqc.txt
+//  """
+//}
 
 /**********
  * alpine *
@@ -586,24 +586,24 @@ process checkDesign{
   """
 }
 
-process outputDocumentation {
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-
-  publishDir "${params.summaryDir}/", mode: 'copy'
-
-  input:
-  file outputDocs from outputDocsCh
-
-  output:
-  file "resultsDescription.html"
-
-  script:
-  """
-  markdown_to_html.py $outputDocs -o resultsDescription.html
-  """
-}
+//process outputDocumentation {
+//  label 'python'
+//  label 'minCpu'
+//  label 'minMem'
+//
+//  publishDir "${params.summaryDir}/", mode: 'copy'
+//
+//  input:
+//  file outputDocs from outputDocsCh
+//
+//  output:
+//  file "resultsDescription.html"
+//
+//  script:
+//  """
+//  markdown_to_html.py $outputDocs -o resultsDescription.html
+//  """
+//}
 
 workflow.onComplete {
 
