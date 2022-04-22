@@ -284,7 +284,7 @@ process fastqc {
 
   script:
   """
-  fastqc -q $reads
+  #fastqc -q $reads
   fastqc --version > v_fastqc.txt
   """
 }
