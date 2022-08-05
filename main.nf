@@ -27,6 +27,8 @@ This script is based on the nf-core guidelines. See https://nf-co.re/ for more i
 ----------------------------------------------------------------------------------------
 */
 
+nextflow.enable.dsl=1
+
 // File with text to display when a developement version is used
 devMessageFile = file("$projectDir/assets/devMessage.txt")
 
