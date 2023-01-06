@@ -110,7 +110,7 @@ mkdir -p ${INSTALL_DIR} ${BUILD_DIR}
 
 # clone the repository
 # the option --recursive is needed if you use geniac as a submodule
-# The option --remote-submodules will pull the last geniac version
+# the option --remote-submodules will pull the last geniac version
 # using the release branch from https://github.com/bioinfo-pf-curie/geniac 
 git clone --remote-submodules --recursive ${GIT_URL} ${SRC_DIR}
 cd ${BUILD_DIR}
