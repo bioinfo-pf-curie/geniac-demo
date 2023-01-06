@@ -1,5 +1,9 @@
 NEW FEATURES
   - Move the test profile file in first position in the nextflow.config file
+  - Geniac sudmodule set to use the last version from the release branch on github
+
+DOCUMENTATION
+  - Use '--remote-submodules' option with 'git clone' to pull last geniac submodule version
 
 version-2.6.2
 12/16/2022
