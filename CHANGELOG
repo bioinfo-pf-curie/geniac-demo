@@ -1,3 +1,11 @@
+version-3.1.0
+08/14/2023
+
+NEW FEATURES
+  - update with geniac version-3.1.0
+  - set memory for outputDocumentation process to 1500MB
+  - update GLAD with Bioconductor 3.17
+
 version-3.0.0
 05/05/2023
 
