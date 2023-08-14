@@ -1,6 +1,7 @@
 
 NEW FEATURES
   - set memory for outputDocumentation process to 1500MB
+  - update GLAD with Bioconductor 3.17
 
 version-3.0.0
 05/05/2023
