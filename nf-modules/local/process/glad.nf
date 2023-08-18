@@ -9,7 +9,7 @@ process glad {
   val renvInitDone
 
   output: 
-  file "BkpInfo.tsv"
+  path "BkpInfo.tsv"
 
   script:
   """
