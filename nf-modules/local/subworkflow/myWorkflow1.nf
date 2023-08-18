@@ -1,5 +1,5 @@
 /*
-Copyright Institut Curie 2020-2021
+Copyright Institut Curie 2020-2023
 
 This software is a computer program whose purpose is to
 provide a demo with geniac.
@@ -14,11 +14,10 @@ of the license and that you accept its terms.
 
 */
 
-
 /*****************************************************************************************
  * workflow example with the following processes:                                        *
  *  - with local variable                                                                *
- *  - helloWord from source code                                                         *
+ *  - helloWorld from source code                                                         *
  *  - process with onlyLinux (standard unix command)                                     *
  *  - process with onlylinux (invoke script from bin/ directory)                         *
  *  - some process with a software that has to be installed with a custom conda yml file *

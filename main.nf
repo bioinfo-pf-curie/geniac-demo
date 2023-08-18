@@ -290,6 +290,14 @@ workflow {
        rawReadsFastqcCh
      )
 
+     /*****************************************************************************************
+      * workflow example with the following processes:                                        *
+      *  - with local variable                                                                *
+      *  - helloWorld from source code                                                         *
+      *  - process with onlyLinux (standard unix command)                                     *
+      *  - process with onlylinux (invoke script from bin/ directory)                         *
+      *  - some process with a software that has to be installed with a custom conda yml file *
+      *****************************************************************************************/
      // myWorkflow1
      oneToFiveCh = Channel.of(1..5)
      myWorkflow1(

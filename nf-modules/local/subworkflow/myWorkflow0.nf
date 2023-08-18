@@ -23,6 +23,11 @@ of the license and that you accept its terms.
 include { checkDesign } from '../process/checkDesign'
 include { fastqc } from '../process/fastqc'
 
+/************************
+ * Check the samplePlan *
+ * FastQC               *
+ ************************/
+
 workflow myWorkflow0 {
     // required inputs
     take:
