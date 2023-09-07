@@ -2,7 +2,7 @@
 process glad {
   label 'renvGlad'
   label 'minCpu'
-  label 'minMem'
+  label 'lowMem'
   publishDir "${params.outDir}/GLAD", mode: 'copy'
 
   input:
