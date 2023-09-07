@@ -1,6 +1,8 @@
 
 NEW FEATURES
   - upgrade with nextflow DSL2
+  - set memory for outputDocumentation process to 2500MB
+  - set memory for glad process to lowMem
 
 version-3.1.0
 08/14/2023
