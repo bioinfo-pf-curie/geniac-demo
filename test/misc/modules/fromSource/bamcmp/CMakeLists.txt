@@ -18,7 +18,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${CMAKE_BINARY_DIR}/src PATTE
 ExternalProject_Add(
     htslib
     SOURCE_DIR ${CMAKE_BINARY_DIR}/src/htslib
-    CONFIGURE_COMMAND autoreconf && ./configure --prefix=${CMAKE_BINARY_DIR}/htslib
+    CONFIGURE_COMMAND autoreconf -i && ./configure --prefix=${CMAKE_BINARY_DIR}/htslib
     BUILD_IN_SOURCE ON
     BUILD_COMMAND     make
     INSTALL_COMMAND   make install

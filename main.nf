@@ -27,7 +27,7 @@ This script is based on the nf-core guidelines. See https://nf-co.re/ for more i
 ----------------------------------------------------------------------------------------
 */
 
-nextflow.enable.dsl=1
+nextflow.enable.dsl=2
 
 // File with text to display when a developement version is used
 devMessageFile = file("$projectDir/assets/devMessage.txt")
@@ -177,7 +177,7 @@ else if(params.readPaths){
 if (params.samplePlan){
   Channel
     .fromPath(params.samplePlan)
-    .into{ samplePlanCh; samplePlanCheckCh }
+    .set{ samplePlanCh }
 }else if(params.readPaths){
   if (params.singleEnd){
     Channel
@@ -185,14 +185,14 @@ if (params.samplePlan){
       .collectFile() {
         item -> ["samplePlan.csv", item[0] + ',' + item[0] + ',' + item[1][0] + '\n']
        }
-      .into{ samplePlanCh; samplePlanCheckCh }
+      .set{ samplePlanCh }
   }else{
      Channel
        .from(params.readPaths)
        .collectFile() {
          item -> ["samplePlan.csv", item[0] + ',' + item[0] + ',' + item[1][0] + ',' + item[1][1] + '\n']
         }
-       .into{ samplePlanCh; samplePlanCheckCh }
+       .set{ samplePlanCh }
   }
 }else{
   if (params.singleEnd){
@@ -201,14 +201,14 @@ if (params.samplePlan){
       .collectFile() {
         item -> ["samplePlan.csv", item[0] + ',' + item[0] + ',' + item[1][0] + '\n']
        }
-      .into { samplePlanCh; samplePlanCheckCh }
+      .set { samplePlanCh }
   }else{
     Channel
       .fromFilePairs( params.reads, size: 2 )
       .collectFile() {
         item -> ["samplePlan.csv", item[0] + ',' + item[0] + ',' + item[1][0] + ',' + item[1][1] + '\n']
       }
-      .into { samplePlanCh; samplePlanCheckCh }
+      .set { samplePlanCh }
    }
 }
 
@@ -222,7 +222,9 @@ if (params.design){
   Channel
     .fromPath(params.design)
     .ifEmpty { exit 1, "Design file not found: ${params.design}" }
-    .into { designCheckCh ; designCh }
+    .set { designCheckCh }
+
+  designCh = designCheckCh 
 
   designCh
     .splitCsv(header:true)
@@ -263,351 +265,84 @@ summary['Config Profile'] = workflow.profile
 log.info summary.collect { k,v -> "${k.padRight(15)}: $v" }.join("\n")
 log.info "======================================================="
 
-// ADD YOUR NEXTFLOW PROCESS HERE
-
-/**********
- * FastQC *
- **********/
-
-process fastqc {
-  label 'fastqc'
-  label 'lowMem'
-  label 'lowCpu'
-
-  tag "${prefix}"
-  publishDir "${params.outDir}/fastqc", mode: 'copy'
-
-  input:
-  set val(prefix), file(reads) from rawReadsFastqcCh
-
-  output:
-  file "*_fastqc.{zip,html}" into fastqcResultsCh
-  file "v_fastqc.txt" into fastqcVersionCh
-
-  script:
-  """
-  fastqc -q $reads
-  fastqc --version > v_fastqc.txt
-  """
-}
-
-/**********
- * alpine *
- **********/
-// example with local variable
-
-oneToFiveCh = Channel.of(1..5)
-process alpine {
-  label 'alpine'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/alpine", mode: 'copy'
-
-  input:
-  val x from oneToFiveCh
-
-  output:
-  file "alpine_*"
-
-  script:
-  """
-  source ${projectDir}/env/alpine.env
-  echo "Hello from alpine: \$(date). This is very high here: \${PEAK_HEIGHT}!" > alpine_${x}.txt
-  """
-}
-
-/******************************
- * helloWord from source code *
- ******************************/
-
-process helloWorld {
-  label 'helloWorld'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/helloWorld", mode: 'copy'
-
-  output:
-  file "helloWorld.txt" into helloWorldOutputCh
-
-  script:
-  """
-  helloWorld > helloWorld.txt
-  """
-}
-
-/**************************************************
- * process with onlyLinux (standard unix command) *
- **************************************************/
-
-process standardUnixCommand {
-  label 'onlyLinux'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/standardUnixCommand", mode: 'copy'
-
-  input:
-  file hello from helloWorldOutputCh
-
-  output:
-  file "bonjourMonde.txt"
-
-  script:
-  """
-  sed -e 's/Hello World/Bonjour Monde/g' ${hello} > bonjourMonde.txt
-  """
-}
-
-/**************************************************************
- * process with onlylinux (invoke script from bin/ directory) *
- **************************************************************/
-
-process execBinScript {
-  label 'onlyLinux'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/execBinScript", mode: 'copy'
-
-  output:
-  file "execBinScriptResults_*"
-
-  script:
-  """
-  apMyscript.sh > execBinScriptResults_1.txt
-  someScript.sh > execBinScriptResults_2.txt
-  """
-}
-
-/***********************************************
- * Some process with a software that has to be *
- * installed with a custom conda yml file      *
- ***********************************************/
-
-process trickySoftware {
-  label 'trickySoftware'
-  label 'minMem'
-  label 'minCpu'
-  publishDir "${params.outDir}/trickySoftware", mode: 'copy'
-
-  output:
-  file "trickySoftwareResults.txt"
-
-  script:
-  """
-  python --version > trickySoftwareResults.txt 2>&1
-  """
-}
-
-/*********************
- * Software versions *
- *********************/
-
-process getSoftwareVersions{
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-  publishDir path: "${params.outDir}/softwareVersions", mode: "copy"
-
-  when:
-  !params.skipSoftVersions
-
-  input:
-  file 'v_fastqc.txt' from fastqcVersionCh.first().ifEmpty([])
-
-  output:
-  file 'softwareVersions_mqc.yaml' into softwareVersionsYamlCh
-
-  script:
-  """
-  echo $workflow.manifest.version &> v_pipeline.txt
-  echo $workflow.nextflow.version &> v_nextflow.txt
-  scrape_software_versions.py &> softwareVersions_mqc.yaml
-  """
-}
-
-/********************
- * Workflow summary *
- ********************/
-
-process workflowSummaryMqc {
-  label 'onlyLinux'
-  when:
-  !params.skipMultiQC
-
-  output:
-  file 'workflowSummary_mqc.yaml' into workflowSummaryYamlCh
-
-  exec:
-  def yaml_file = task.workDir.resolve('workflowSummary_mqc.yaml')
-  yaml_file.text  = """
-  id: 'summary'
-  description: " - this information is collected when the pipeline is started."
-  section_name: 'Workflow Summary'
-  section_href: "${workflow.manifest.homePage}"
-  plot_type: 'html'
-  data: |
-        <dl class=\"dl-horizontal\">
-  ${summary.collect { k,v -> "            <dt>$k</dt><dd><samp>${v ?: '<span style=\"color:#999999;\">N/A</a>'}</samp></dd>" }.join("\n")}
-        </dl>
-  """.stripIndent()
-}
-
-/***********
- * MultiQC *
- ***********/
-
-process multiqc {
-  label 'multiqc'
-  label 'minCpu'
-  label 'minMem'
-  publishDir "${params.outDir}/MultiQC", mode: 'copy'
-
-  when:
-  !params.skipMultiQC
-
-  input:
-  file splan from samplePlanCh.collect()
-  file multiqcConfig from multiqcConfigCh
-  file ('fastqc/*') from fastqcResultsCh.collect().ifEmpty([])
-  file metadata from metadataCh.ifEmpty([])
-  file ('softwareVersions/*') from softwareVersionsYamlCh.collect().ifEmpty([])
-  file ('workflowSummary/*') from workflowSummaryYamlCh.collect()
-
-  output: 
-  file splan
-  file "*report.html" into multiqcReportCh
-  file "*_data"
-
-  script:
-  rtitle = customRunName ? "--title \"$customRunName\"" : ''
-  rfilename = customRunName ? "--filename " + customRunName + "_report" : "--filename report"
-  metadataOpts = params.metadata ? "--metadata ${metadata}" : ""
-  designOpts = params.design ? "-d ${params.design}" : ""
-  modulesList = "-m custom_content -m fastqc"
-  """
-  apMqcHeader.py --splan ${splan} --name "${workflow.manifest.name}" --version "${workflow.manifest.version}" ${metadataOpts} > multiqc-config-header.yaml
-  multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
-  """
-}
-
-/***************************
- * Example with R and renv *
- ***************************/
-
-process renvGladInit {
-  label 'onlyLinux'
-  label 'minCpu'
-  label 'minMem'
-
-  output:
-  val(true) into renvGladInitDoneCh
-
-  script:
-    def renvName = 'renvGlad' // This is the only variable which needs to be modified
-    def renvYml = params.geniac.tools.get(renvName).get('yml')
-    def renvEnv = params.geniac.tools.get(renvName).get('env')
-    def renvBioc = params.geniac.tools.get(renvName).get('bioc')
-    def renvLockfile = projectDir.toString() + '/recipes/dependencies/' + renvName + '/renv.lock'
-    
-
-    // The code below is generic, normally, no modification is required
-    if (workflow.profile.contains('multiconda') || workflow.profile.contains('conda')) {
-        """
-        if conda env list | grep -wq ${renvEnv} || [ -d "${params.condaCacheDir}" -a -d "${renvEnv}" ] ; then
-            echo "prefix already exists, skipping environment creation"
-        else
-            CONDA_PKGS_DIRS=. conda env create --prefix ${renvEnv} --file ${renvYml}
-        fi
-  
-        set +u
-        conda_base=\$(dirname \$(which conda))
-        if [ -f \$conda_ conda/../../etc/profile.d/conda.sh ]; then
-          conda_script="\$conda_base/../../etc/profile.d/conda.sh"
-        else
-          conda_script="\$conda_base/../etc/profile.d/conda.sh"
-        fi
-  
-        echo \$conda_script
-        source \$conda_script
-        conda activate ${renvEnv}
-        set -u
-  
-        export PKG_CONFIG_PATH=\$(dirname \$(which conda))/../lib/pkgconfig
-        export PKG_LIBS="-liconv"
-  
-        R -q -e "options(repos = \\"https://cloud.r-project.org\\") ; install.packages(\\"renv\\") ; options(renv.consent = TRUE, renv.config.install.staged=FALSE, renv.settings.use.cache=TRUE) ; install.packages(\\"BiocManager\\"); BiocManager::install(version=\\"${renvBioc}\\", ask=FALSE) ; renv::restore(lockfile = \\"${renvLockfile}\\")"
-        """
-    } else {
-        """
-        echo "profiles: ${workflow.profile} ; skip renv step"
-        """
-    }
-}
-
-renvGladInitDoneCh.set{ renvGladDoneCh}
-
-process glad {
-  label 'renvGlad'
-  label 'minCpu'
-  label 'minMem'
-  publishDir "${params.outDir}/GLAD", mode: 'copy'
-
-  input:
-  val(done) from renvGladDoneCh
-
-  output: 
-  file "BkpInfo.tsv"
-
-  script:
-  """
-  Rscript ${projectDir}/bin/apGlad.R
-  """
-}
-
-
-/****************
- * Sub-routines *
- ****************/
-
-process checkDesign{
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-  publishDir "${params.summaryDir}/", mode: 'copy'
-
-  when:
-  params.design
-
-  input:
-  file design from designCheckCh
-  file samplePlan from samplePlanCheckCh
-
-  script:
-  optSE = params.singleEnd ? "--singleEnd" : ""
-  """
-  apCheckDesign.py -d $design -s $samplePlan ${optSE}
-  """
-}
-
-process outputDocumentation {
-  label 'python'
-  label 'minCpu'
-  label 'minMem'
-
-  publishDir "${params.summaryDir}/", mode: 'copy'
-
-  input:
-  file outputDocs from outputDocsCh
-
-  output:
-  file "resultsDescription.html"
-
-  script:
-  """
-  markdown_to_html.py $outputDocs -o resultsDescription.html
-  """
+// ADD YOUR NEXTFLOW SUBWORFLOWS HERE
+
+// Workflows
+// QC : check design and factqc
+include { myWorkflow0 } from './nf-modules/local/subworkflow/myWorkflow0'
+include { myWorkflow1 } from './nf-modules/local/subworkflow/myWorkflow1'
+
+// Processes
+include { getSoftwareVersions } from './nf-modules/local/process/getSoftwareVersions'
+include { workflowSummaryMqc } from './nf-modules/local/process/workflowSummaryMqc'
+include { multiqc } from './nf-modules/local/process/multiqc'
+include { glad } from './nf-modules/local/process/glad'
+include { renvInit as renvGladInit } from './nf-modules/local/process/renvInit'
+include { outputDocumentation } from './nf-modules/local/process/outputDocumentation'
+
+workflow {
+    main:
+
+     // myWorkflow0
+     myWorkflow0(
+       designCheckCh,
+       samplePlanCh,
+       rawReadsFastqcCh
+     )
+
+     /*****************************************************************************************
+      * workflow example with the following processes:                                        *
+      *  - with local variable                                                                *
+      *  - helloWorld from source code                                                         *
+      *  - process with onlyLinux (standard unix command)                                     *
+      *  - process with onlylinux (invoke script from bin/ directory)                         *
+      *  - some process with a software that has to be installed with a custom conda yml file *
+      *****************************************************************************************/
+     // myWorkflow1
+     oneToFiveCh = Channel.of(1..5)
+     myWorkflow1(
+       oneToFiveCh
+     )
+
+     /***************************
+      * Example with R and renv *
+      ***************************/
+	  renvGladInit('renvGlad')
+      glad(renvGladInit.out.renvInitDone)
+
+     /*********************
+      * Software versions *
+      *********************/
+     getSoftwareVersions(
+       myWorkflow0.out.version.first().ifEmpty([])
+     )
+
+     /********************
+      * Workflow summary *
+      ********************/
+     workflowSummaryMqc(summary) 
+
+     /***********
+      * MultiQC *
+      ***********/
+     multiqc(
+       customRunName,
+       samplePlanCh.collect(),
+       multiqcConfigCh,
+       myWorkflow0.out.fastqcResultsCh.collect().ifEmpty([]),
+       metadataCh.ifEmpty([]),
+       getSoftwareVersions.out.collect().ifEmpty([]),
+       workflowSummaryMqc.out.collect()
+     )
+
+     /****************
+      * Sub-routines *
+      ****************/
+     outputDocumentation(outputDocsCh)
 }
 
 workflow.onComplete {
+
 
   // pipelineReport.html
   def reportFields = [:]
