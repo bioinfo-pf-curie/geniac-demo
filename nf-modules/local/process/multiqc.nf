@@ -38,9 +38,9 @@ process multiqc {
   path ('workflow_summary/*') 
 
   output:
-  path splan
-  path "*report.html", emit: multiqc_report
-  path "*_data"
+  path splan, emit: splan
+  path "*report.html", emit: report
+  path "*_data", emit: data
 
   script:
   rtitle = customRunName ? "--title \"$customRunName\"" : ''
@@ -53,4 +53,3 @@ process multiqc {
   multiqc . -f $rtitle $rfilename -c multiqc-config-header.yaml -c $multiqcConfig $modulesList
   """
 }
-
