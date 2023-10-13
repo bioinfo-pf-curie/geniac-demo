@@ -149,7 +149,6 @@ include { myWorkflow1 } from './nf-modules/local/subworkflow/myWorkflow1'
 
 // Processes
 include { getSoftwareVersions } from './nf-modules/local/process/getSoftwareVersions'
-include { workflowSummaryMqc } from './nf-modules/local/process/workflowSummaryMqc'
 include { multiqc } from './nf-modules/local/process/multiqc'
 include { glad } from './nf-modules/local/process/glad'
 include { renvInit as renvGladInit } from './nf-modules/local/process/renvInit'
@@ -198,11 +197,6 @@ workflow {
        myWorkflow0.out.version.first().ifEmpty([])
      )
 
-     /********************
-      * Workflow summary *
-      ********************/
-     workflowSummaryMqc(summary) 
-
      /***********
       * MultiQC *
       ***********/
@@ -213,7 +207,7 @@ workflow {
        myWorkflow0.out.fastqcResultsCh.collect().ifEmpty([]),
        metadataCh.ifEmpty([]),
        getSoftwareVersions.out.collect().ifEmpty([]),
-       workflowSummaryMqc.out.collect()
+       workflowSummaryCh.collectFile(name: "workflow_summary_mqc.yaml")
      )
      mqcReport = multiqc.out.report.toList()
 
