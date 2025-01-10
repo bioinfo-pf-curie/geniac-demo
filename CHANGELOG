@@ -1,8 +1,10 @@
+version-3.3.0
+01/10/2023
 
 NEW FEATURES
   - use readPaths instead of samplePlan
   - use NFTools library
-  - update with geniac version-3.2.1
+  - update with geniac version-3.6.0
 
 BUGFIX
   - Update conda env dependencies due to modification in some python libraries
