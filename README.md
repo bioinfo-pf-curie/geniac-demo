@@ -46,6 +46,7 @@ export GENIAC_CONDA="https://raw.githubusercontent.com/bioinfo-pf-curie/geniac/r
 wget ${GENIAC_CONDA}
 conda env create -f environment.yml
 conda activate geniac
+pip install geniac
 ```
 
 ### Check the code, install and run the pipeline with the multiconda profile
